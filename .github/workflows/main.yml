@@ -1,0 +1,33 @@
+name: Download and Preprocess Data
+
+on: [push, workflow_dispatch]
+
+jobs:
+  preprocess_data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.12'
+
+      - name: Install Dependencies
+        run: pip install kaggle pandas scikit-learn
+
+      - name: Download and Preprocess Dataset
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        run: python scripts/download_and_preprocess.py
+
+      - name: Commit and Push Processed Data
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git add data/creditcard_cleaned.csv
+          git commit -m "Add preprocessed dataset"
+          git push
+
